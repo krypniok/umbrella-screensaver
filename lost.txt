@@ -1,0 +1,52 @@
+void gluiGenerateCircleSegment(float x0, float y0, float radius, float startAngle, float endAngle, int numSegments)
+{
+    // numSegments--;
+    // Berechne den Winkelabstand zwischen den Segmenten
+    float angleStep = (endAngle - startAngle) / numSegments;
+
+    // Berechne die Punkte des Kreissegments und zeichne sie
+    for (int i = 0; i < numSegments; ++i)
+    {
+        // Berechne den aktuellen Winkel für dieses Segment
+        float angle = startAngle + i * angleStep;
+
+        // Berechne die x- und y-Koordinaten des Punktes auf dem Rand des Kreises
+        float x = x0 + cos(angle) * radius;
+        float y = y0 + sin(angle) * radius;
+
+        // Zeichne den Punkt
+        glVertex2f(x, y);
+    }
+}
+
+void gluiRenderRoundedRect(float x, float y, float width, float height, float radius, float* color) {
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glColor4fv(color);
+    glDisable(GL_TEXTURE_2D);
+    glTranslatef(x+radius-1, y+radius-1, 0.0f);
+    // Das ist nötig um Pixelgenau zu sein
+    glTranslatef(0.375f, 0.375f, 0.0f);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+    int segments = 16;
+    width -= (radius+radius+1);
+    height -= 1;
+
+    glBegin(GL_POLYGON);
+        // Oben Links
+        gluiGenerateCircleSegment(x, y, radius, M_PI, M_PI+M_PI_H2, segments);
+        // Kante oben
+        glVertex2f(x+width-radius-radius, y-radius);
+        // Oben Rechts
+        gluiGenerateCircleSegment(x+width, y, radius, M_PI+M_PI_H2, M_PI_2, segments);
+        // Kante Rechts
+        glVertex2f(x+width+radius, y+height-radius-radius);
+        // Unten Rechts
+        gluiGenerateCircleSegment(x+width, y+height-radius-radius, radius, 0.0f, M_PI_H2, segments);
+        // Kante unten
+        glVertex2f(x, y+height-radius);
+        // Unten Links
+        gluiGenerateCircleSegment(x, y+height-radius-radius, radius, M_PI_H2, M_PI, segments);
+    glEnd(); // GL_POLYGON
+}
